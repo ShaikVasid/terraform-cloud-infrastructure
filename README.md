@@ -1,50 +1,23 @@
 # Terraform Azure Cloud Infrastructure
 
-Production-style Infrastructure as Code portfolio project demonstrating reusable Terraform patterns for **Microsoft Azure** cloud infrastructure.
+This is a Terraform project I use to demonstrate how I approach Azure infrastructure when I want the code to be reusable instead of having everything in one environment file.
 
-## What this project demonstrates
+The main focus is the Azure side: networking, security, identity, environment separation, and the Terraform workflow around those pieces.
 
-- Reusable Terraform modules
-- Dev/prod environment separation
-- Azure Resource Groups and VNets
-- Public/private subnet architecture
+## What is in here
+
+- Azure Resource Groups and Virtual Networks
+- Separate public and private subnets
 - Network Security Groups
-- Azure managed identities
-- Azure RBAC with least-privilege access
-- Terraform formatting and validation in GitHub Actions
-- Secure variable handling
-- Infrastructure design, security, and operational documentation
+- Managed Identity and Azure RBAC
+- Reusable Terraform modules
+- Dev and prod environment structure
+- Terraform validation through GitHub Actions
+- Basic naming and tagging conventions
 
-> This repository is a portfolio implementation designed to demonstrate engineering practices. It does not represent a production environment or claim ownership of infrastructure operated for an employer.
+This is a portfolio project, not a copy of an employer environment. The point is to show how I would structure the infrastructure and the decisions I would make around it.
 
-## Architecture
-
-```text
-                         Microsoft Azure
-                                |
-                       +--------+--------+
-                       |  Resource Group |
-                       +--------+--------+
-                                |
-                         +------+------+
-                         |     VNet    |
-                         +------+------+
-                                |
-                 +--------------+--------------+
-                 |                             |
-          Public Subnet                  Private Subnet
-                 |                             |
-          +------+-------+              +------+-------+
-          | NSG / Ingress|              | Application  |
-          | Controls     |              | Workloads    |
-          +--------------+              +------+-------+
-                                                |
-                                         Managed Identity
-                                                |
-                                           Azure RBAC
-```
-
-## Repository structure
+## Layout
 
 ```text
 .
@@ -59,50 +32,21 @@ Production-style Infrastructure as Code portfolio project demonstrating reusable
 │   ├── security/
 │   └── iam/
 ├── scripts/
-│   ├── validate.sh
-│   └── destroy.sh
 ├── .gitignore
 ├── Makefile
 └── README.md
 ```
 
-## Terraform workflow
+## How I normally work with it
 
-```text
-Code change
-    ↓
-terraform fmt
-    ↓
-terraform init
-    ↓
-terraform validate
-    ↓
-terraform plan
-    ↓
-Code review
-    ↓
-terraform apply
-```
+I keep the environment-specific values in `environments/` and the reusable building blocks in `modules/`. That makes it easier to change a network or identity component without duplicating the same Terraform across environments.
 
-## Getting started
-
-Requirements:
-
-- Terraform >= 1.6
-- Azure CLI
-- An Azure subscription
-- Appropriate Azure permissions to create the resources
-
-Authenticate locally:
+For a local run:
 
 ```bash
 az login
 az account set --subscription "<subscription-id>"
-```
 
-Then:
-
-```bash
 cd environments/dev
 terraform init
 terraform fmt -recursive
@@ -110,55 +54,34 @@ terraform validate
 terraform plan
 ```
 
-Never commit credentials, service-principal secrets, state files, private keys, or environment-specific secrets.
+I deliberately keep `terraform apply` out of the CI validation workflow. A plan should be reviewed before anything changes in a shared environment.
 
-## Azure design
+## A few design choices
 
 ### Networking
 
-The networking module creates an Azure Resource Group, Virtual Network, and separate public/private subnets. The structure is designed to provide a reusable foundation for application workloads.
+The networking module creates the resource group, VNet, and public/private subnets. The intent is to keep application workloads in the private side and expose only the components that actually need public access.
 
 ### Security
 
-The security module uses an Azure Network Security Group with explicit inbound rules. The default design avoids exposing application workloads directly to the public internet.
+NSGs are defined separately so the network rules are easy to review. I avoid opening broad inbound access just to make an example work.
 
 ### Identity
 
-The identity module creates a user-assigned managed identity and grants it the **Reader** role at resource-group scope. This demonstrates workload identity without embedding long-lived credentials in infrastructure or application code.
+The identity module uses a managed identity and Azure RBAC rather than putting service-principal credentials into Terraform or application configuration.
 
-### Least privilege
+### Scope
 
-Azure RBAC assignments should use the narrowest practical built-in role and scope. Broad subscription-level permissions should be avoided unless there is a documented requirement.
+RBAC should be assigned at the smallest useful scope. If a workload only needs access to one resource group, there is usually no reason to grant the same permission at subscription scope.
 
-## CI/CD
+## CI
 
-GitHub Actions runs Terraform formatting and validation checks on pull requests and pushes affecting Terraform code.
+GitHub Actions checks formatting and runs `terraform validate`. It does not deploy Azure resources automatically.
 
-The workflow intentionally does **not** automatically apply infrastructure. Production changes should go through review and an explicit deployment process.
+## Technologies
 
-## Design principles
+**Terraform · Microsoft Azure · Azure VNet · Azure NSG · Azure RBAC · Managed Identity · GitHub Actions · Infrastructure as Code**
 
-### Reusability
+## Notes
 
-Networking, compute, security, and identity are separated into modules so environments can compose the same building blocks with different configuration.
-
-### Security
-
-The design follows least privilege, uses managed identity rather than long-lived credentials, and keeps secrets out of source control.
-
-### Reliability
-
-Infrastructure changes are validated before deployment, environments are separated, and operational actions are documented.
-
-### Maintainability
-
-Resources use consistent naming and tagging conventions. Variables and outputs provide clear module interfaces.
-
-## Skills demonstrated
-
-**Terraform · Microsoft Azure · Azure VNet · Azure NSG · Azure RBAC · Managed Identity · Infrastructure as Code · GitHub Actions · Cloud Security · CI/CD · DevOps · SRE**
-
-## Author
-
-Vasid Shaik  
-Cloud / DevOps / SRE Engineer
+I am continuing to expand this repository with more Azure services and a proper remote-state setup. The current version is intentionally small enough to read through without needing to understand a large platform first.
