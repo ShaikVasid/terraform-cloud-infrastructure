@@ -1,1 +1,1 @@
-output "security_group_id" { value = aws_security_group.application.id }
+output "network_security_group_id" { value = azurerm_network_security_group.application.id }
