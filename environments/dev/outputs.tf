@@ -1,5 +1,7 @@
-output "vpc_id" { value = module.networking.vpc_id }
-output "public_subnet_ids" { value = module.networking.public_subnet_ids }
-output "private_subnet_ids" { value = module.networking.private_subnet_ids }
-output "application_security_group_id" { value = module.security.security_group_id }
-output "ec2_role_name" { value = module.iam.role_name }
+output "resource_group_id" { value = module.networking.resource_group_id }
+output "resource_group_name" { value = module.networking.resource_group_name }
+output "vnet_id" { value = module.networking.vnet_id }
+output "public_subnet_id" { value = module.networking.public_subnet_id }
+output "private_subnet_id" { value = module.networking.private_subnet_id }
+output "network_security_group_id" { value = module.security.network_security_group_id }
+output "managed_identity_principal_id" { value = module.identity.principal_id }
