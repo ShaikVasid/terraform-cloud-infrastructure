@@ -1,10 +1,3 @@
-variable "name" { type = string }
-variable "vpc_cidr" { type = string }
-variable "azs" { type = list(string) }
-variable "public_subnet_cidrs" { type = list(string) }
-variable "private_subnet_cidrs" { type = list(string) }
-variable "tags" { type = map(string) default = {} }
-
 resource "aws_vpc" "this" {
   cidr_block           = var.vpc_cidr
   enable_dns_support   = true
@@ -36,7 +29,10 @@ resource "aws_subnet" "private" {
 
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.this.id
-  route { cidr_block = "0.0.0.0/0" gateway_id = aws_internet_gateway.this.id }
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.this.id
+  }
   tags = merge(var.tags, { Name = "${var.name}-public-rt" })
 }
 
