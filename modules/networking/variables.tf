@@ -1,6 +1,35 @@
-variable "name" { type = string }
-variable "vpc_cidr" { type = string }
-variable "azs" { type = list(string) }
-variable "public_subnet_cidrs" { type = list(string) }
-variable "private_subnet_cidrs" { type = list(string) }
-variable "tags" { type = map(string) default = {} }
+variable "name" {
+  description = "Base name used for networking resources."
+  type        = string
+}
+
+variable "location" {
+  description = "Azure region where networking resources are deployed."
+  type        = string
+}
+
+variable "resource_group_name" {
+  description = "Resource group containing the networking resources."
+  type        = string
+}
+
+variable "address_space" {
+  description = "Address space for the Azure virtual network."
+  type        = string
+}
+
+variable "public_subnet_prefix" {
+  description = "CIDR prefix for the public subnet."
+  type        = string
+}
+
+variable "private_subnet_prefix" {
+  description = "CIDR prefix for the private subnet."
+  type        = string
+}
+
+variable "tags" {
+  description = "Tags applied to networking resources."
+  type        = map(string)
+  default     = {}
+}
