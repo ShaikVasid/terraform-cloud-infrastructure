@@ -1,11 +1,7 @@
-variable "name" { type = string }
-variable "resource_group_id" { type = string }
-variable "tags" { type = map(string) default = {} }
-
 resource "azurerm_user_assigned_identity" "workload" {
   name                = "${var.name}-identity"
-  location            = "Canada Central"
-  resource_group_name = element(split("/", var.resource_group_id), 4)
+  location            = var.location
+  resource_group_name = var.resource_group_name
   tags                = var.tags
 }
 
