@@ -1,17 +1,18 @@
-# Terraform Cloud Infrastructure
+# Terraform Azure Cloud Infrastructure
 
-Production-style Infrastructure as Code portfolio project demonstrating reusable Terraform patterns for AWS cloud infrastructure.
+Production-style Infrastructure as Code portfolio project demonstrating reusable Terraform patterns for **Microsoft Azure** cloud infrastructure.
 
 ## What this project demonstrates
 
 - Reusable Terraform modules
-- Environment separation for dev and prod
-- VPC networking with public and private subnets
-- IAM least-privilege patterns
-- EC2-based compute
-- Remote-state-ready project structure
+- Dev/prod environment separation
+- Azure Resource Groups and VNets
+- Public/private subnet architecture
+- Network Security Groups
+- Azure managed identities
+- Azure RBAC with least-privilege access
 - Terraform formatting and validation in GitHub Actions
-- Safe variable handling through `.tfvars.example`
+- Secure variable handling
 - Infrastructure design, security, and operational documentation
 
 > This repository is a portfolio implementation designed to demonstrate engineering practices. It does not represent a production environment or claim ownership of infrastructure operated for an employer.
@@ -19,24 +20,28 @@ Production-style Infrastructure as Code portfolio project demonstrating reusable
 ## Architecture
 
 ```text
-                         AWS
-                          |
-                    +-----+-----+
-                    |    VPC    |
-                    +-----+-----+
-                          |
-             +------------+------------+
-             |                         |
-       Public Subnets             Private Subnets
-             |                         |
-      +------+-------+          +------+-------+
-      | Load Balancer|          | Application  |
-      | / Bastion    |          | Workloads    |
-      +------+-------+          +------+-------+
-             |                         |
-             +------------+------------+
-                          |
-                    IAM / Security
+                         Microsoft Azure
+                                |
+                       +--------+--------+
+                       |  Resource Group |
+                       +--------+--------+
+                                |
+                         +------+------+
+                         |     VNet    |
+                         +------+------+
+                                |
+                 +--------------+--------------+
+                 |                             |
+          Public Subnet                  Private Subnet
+                 |                             |
+          +------+-------+              +------+-------+
+          | NSG / Ingress|              | Application  |
+          | Controls     |              | Workloads    |
+          +--------------+              +------+-------+
+                                                |
+                                         Managed Identity
+                                                |
+                                           Azure RBAC
 ```
 
 ## Repository structure
@@ -84,10 +89,18 @@ terraform apply
 Requirements:
 
 - Terraform >= 1.6
-- AWS CLI configured with appropriate credentials
-- An AWS account for deployment
+- Azure CLI
+- An Azure subscription
+- Appropriate Azure permissions to create the resources
 
-Example:
+Authenticate locally:
+
+```bash
+az login
+az account set --subscription "<subscription-id>"
+```
+
+Then:
 
 ```bash
 cd environments/dev
@@ -97,7 +110,25 @@ terraform validate
 terraform plan
 ```
 
-Never commit real credentials, state files, private keys, or environment-specific secrets.
+Never commit credentials, service-principal secrets, state files, private keys, or environment-specific secrets.
+
+## Azure design
+
+### Networking
+
+The networking module creates an Azure Resource Group, Virtual Network, and separate public/private subnets. The structure is designed to provide a reusable foundation for application workloads.
+
+### Security
+
+The security module uses an Azure Network Security Group with explicit inbound rules. The default design avoids exposing application workloads directly to the public internet.
+
+### Identity
+
+The identity module creates a user-assigned managed identity and grants it the **Reader** role at resource-group scope. This demonstrates workload identity without embedding long-lived credentials in infrastructure or application code.
+
+### Least privilege
+
+Azure RBAC assignments should use the narrowest practical built-in role and scope. Broad subscription-level permissions should be avoided unless there is a documented requirement.
 
 ## CI/CD
 
@@ -109,11 +140,11 @@ The workflow intentionally does **not** automatically apply infrastructure. Prod
 
 ### Reusability
 
-Networking, compute, security, and IAM are separated into modules so environments can compose the same building blocks with different configuration.
+Networking, compute, security, and identity are separated into modules so environments can compose the same building blocks with different configuration.
 
 ### Security
 
-The design follows least privilege, avoids hard-coded credentials, separates public and private network resources, and keeps secrets out of source control.
+The design follows least privilege, uses managed identity rather than long-lived credentials, and keeps secrets out of source control.
 
 ### Reliability
 
@@ -125,7 +156,7 @@ Resources use consistent naming and tagging conventions. Variables and outputs p
 
 ## Skills demonstrated
 
-**Terraform · AWS · Infrastructure as Code · GitHub Actions · IAM · VPC · EC2 · Linux · Cloud Security · CI/CD · DevOps · SRE**
+**Terraform · Microsoft Azure · Azure VNet · Azure NSG · Azure RBAC · Managed Identity · Infrastructure as Code · GitHub Actions · Cloud Security · CI/CD · DevOps · SRE**
 
 ## Author
 
